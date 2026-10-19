@@ -1,0 +1,3 @@
+feature_id,position,n_active_patches,spearman_activation_vs_effect,sum_single_patch_effects,global_effect,max_patch_effect,top_effect_patch
+29,69,7,-0.7857142857142859,-0.0002408921718597412,-0.0002396702766418457,0.0,0
+29,51,1,,-3.3915042877197266e-05,-3.3915042877197266e-05,0.0,0
