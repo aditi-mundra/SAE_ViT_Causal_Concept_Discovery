@@ -1,0 +1,40 @@
+{
+  "n": 80,
+  "num_patches": 196,
+  "d_model": 64,
+  "layers": [
+    2
+  ],
+  "num_prefix_tokens": 1,
+  "dtype": "float16",
+  "model": "tiny_vit",
+  "dataset": "synthetic",
+  "seed": 42,
+  "class_names": [
+    "synthetic_0",
+    "synthetic_1",
+    "synthetic_2",
+    "synthetic_3",
+    "synthetic_4",
+    "synthetic_5",
+    "synthetic_6",
+    "synthetic_7",
+    "synthetic_8",
+    "synthetic_9"
+  ],
+  "model_class_names": [
+    "synthetic_0",
+    "synthetic_1",
+    "synthetic_2",
+    "synthetic_3",
+    "synthetic_4",
+    "synthetic_5",
+    "synthetic_6",
+    "synthetic_7",
+    "synthetic_8",
+    "synthetic_9"
+  ],
+  "grid": 14,
+  "patch_size": 16,
+  "complete": true
+}

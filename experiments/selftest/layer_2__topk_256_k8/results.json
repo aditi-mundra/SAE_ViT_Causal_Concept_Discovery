@@ -1,0 +1,17 @@
+{
+  "metrics": {
+    "mse": 0.46375804044762436,
+    "explained_variance": 0.5593264844646867,
+    "l0": 8.0,
+    "dead_pct_eval": 8.59375,
+    "mean_feature_density": 0.03125,
+    "n_vectors": 3136,
+    "dead_pct_train_last_epoch": 1.5625
+  },
+  "warnings": [
+    "SAE reconstruction is poor (explained variance 0.559 < 0.70)"
+  ],
+  "train_seconds": 0.4754636287689209,
+  "n_train_images": 48,
+  "n_val_images": 16
+}
