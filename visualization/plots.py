@@ -1,6 +1,7 @@
 """visualization/plots.py [CORE]: publication-style figures (matplotlib, Agg backend)."""
 from __future__ import annotations
 
+import inspect
 from pathlib import Path
 
 import matplotlib
@@ -43,10 +44,11 @@ def plot_feature_distributions(summ, path):
 
 def plot_sae_vs_neuron(summ, nsum, path):
     fig, ax = plt.subplots(1, 4, figsize=(14, 3))
+    label_kw = "tick_labels" if "tick_labels" in inspect.signature(ax[0].boxplot).parameters else "labels"
     for a, (c, t) in zip(ax, [("purity", "class purity"), ("class_entropy_norm", "norm. class entropy"),
                               ("spatial_conc10", "spatial concentration"), ("interp_score", "interp. score")]):
         a.boxplot([summ.loc[~summ["dead"], c].dropna(), nsum.loc[~nsum["dead"], c].dropna()],
-                  labels=["SAE features", "raw neurons"], showfliers=False); a.set_title(t)
+                  showfliers=False, **{label_kw: ["SAE features", "raw neurons"]}); a.set_title(t)
     return _save(fig, path)
 
 
