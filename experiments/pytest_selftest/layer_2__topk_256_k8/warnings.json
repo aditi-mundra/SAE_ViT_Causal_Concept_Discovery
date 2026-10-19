@@ -1,0 +1,7 @@
+[
+  "SAE reconstruction is poor (explained variance 0.559 < 0.70)",
+  "feature 140: ablation effect not distinguishable from random (p_emp=0.833)",
+  "feature 187: ablation effect not distinguishable from random (p_emp=0.667)",
+  "feature 29: ablation effect not distinguishable from random (p_emp=0.500)",
+  "feature 44: ablation effect not distinguishable from random (p_emp=0.500)"
+]
