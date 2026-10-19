@@ -115,7 +115,14 @@ def build_summary(stats: dict, store, grid: int, dcfg, class_names) -> pd.DataFr
         tpp[j] = np.bincount(store.labels[imgs], minlength=C).max() / len(valid)
         tun[j] = len(np.unique(imgs)) / len(valid)
     conc_rescaled = np.clip((sp["spatial_conc10"] - 0.1) / 0.9, 0, 1)
-    interp = np.nanmean(np.vstack([1 - H_norm, tpp, conc_rescaled]), axis=0)
+    interp_components = np.vstack([1 - H_norm, tpp, conc_rescaled])
+    valid_interp = np.isfinite(interp_components)
+    interp = np.divide(
+        np.where(valid_interp, interp_components, 0).sum(0),
+        valid_interp.sum(0),
+        out=np.full(W, np.nan),
+        where=valid_interp.sum(0) > 0,
+    )
     lo, hi = dcfg.specific_thresholds
     spec = np.where(np.isnan(H_norm), "dead", np.where(H_norm < lo, "highly_specific",
                     np.where(H_norm < hi, "moderately_specific", "polysemantic")))

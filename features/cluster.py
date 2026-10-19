@@ -9,13 +9,13 @@ from sklearn.manifold import TSNE
 
 
 def cluster_decoder_vectors(sae, summary: pd.DataFrame, dcfg, seed: int = 0, max_features: int = 4000, logger=None):
-    alive = summary.index[(~summary["dead"]).values].to_numpy()
+    alive = summary.index[(~summary["dead"]).values].to_numpy(dtype=np.int64, copy=True)
     if len(alive) < 15:
         if logger: logger.warning("[cluster] too few alive features to cluster")
         return None
     if len(alive) > max_features:
         alive = np.random.RandomState(seed).choice(alive, max_features, replace=False)
-    dec = sae.W_dec[alive].detach().cpu().numpy()
+    dec = sae.W_dec[alive].detach().cpu().numpy().copy()
     dec = dec / np.maximum(np.linalg.norm(dec, axis=1, keepdims=True), 1e-8)
     Z = PCA(n_components=min(50, dec.shape[0] - 1, dec.shape[1]), random_state=seed).fit_transform(dec)
     k = min(dcfg.n_clusters, len(alive) // 3)
