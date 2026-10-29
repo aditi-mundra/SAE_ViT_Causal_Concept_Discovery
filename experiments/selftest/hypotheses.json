@@ -20,7 +20,7 @@
       },
       "interp_score": {
         "sae_median": 0.6897136006770691,
-        "neuron_median": 0.3917569301420033,
+        "neuron_median": 0.39175693014200336,
         "p": 4.7496720832492284e-32
       }
     },
@@ -43,7 +43,7 @@
     "n_separated": 0,
     "n_candidates": 4,
     "features_separated": [],
-    "mean_delta_logit_primary_alpha": 7.227407768368601e-05
+    "mean_delta_logit_primary_alpha": 7.227407768368721e-05
   },
   "H5": {
     "verdict": "Partially supported (per-modified-patch effect only)",

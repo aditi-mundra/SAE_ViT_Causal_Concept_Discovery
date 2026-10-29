@@ -13,7 +13,7 @@
   },
   "data": {
     "dataset": "synthetic",
-    "root": "C:\\Users\\ADMIN\\Desktop\\SAE_ViT_Causal_Concept_Discovery\\SAE_ViT_Causal_Concept_Discovery\\data\\raw",
+    "root": "C:\\Users\\ADMIN\\Desktop\\SAE_ViT_Causal_Concept_Discovery\\data\\raw",
     "folder": "",
     "num_images": 80,
     "batch_size": 20,
@@ -28,7 +28,7 @@
     "layers": [
       2
     ],
-    "out_dir": "C:\\Users\\ADMIN\\Desktop\\SAE_ViT_Causal_Concept_Discovery\\SAE_ViT_Causal_Concept_Discovery\\activations\\store",
+    "out_dir": "C:\\Users\\ADMIN\\Desktop\\SAE_ViT_Causal_Concept_Discovery\\activations\\store",
     "dtype": "float16",
     "normalization": "standardize",
     "write_patch_metadata": false
@@ -149,6 +149,6 @@
       8
     ]
   },
-  "created": "2026-10-20 01:08:00",
+  "created": "2026-10-29 22:28:56",
   "run_tag": "layer_2__topk_256_k8"
 }

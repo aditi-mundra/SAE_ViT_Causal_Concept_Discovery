@@ -3,7 +3,7 @@
 ## H1: **Supported**
 
 - metrics_significantly_better: 4
-- details: {'class_entropy_norm': {'sae_median': 0.2925732701671937, 'neuron_median': 0.6555380507502715, 'p': 3.019427089927941e-33}, 'purity': {'sae_median': 0.6972734899999999, 'neuron_median': 0.40962212, 'p': 1.968347994646941e-26}, 'spatial_conc10': {'sae_median': 0.83707995, 'neuron_median': 0.1571102, 'p': 1.197032968030362e-32}, 'interp_score': {'sae_median': 0.6897136006770691, 'neuron_median': 0.3917569301420033, 'p': 4.7496720832492284e-32}}
+- details: {'class_entropy_norm': {'sae_median': 0.2925732701671937, 'neuron_median': 0.6555380507502715, 'p': 3.019427089927941e-33}, 'purity': {'sae_median': 0.6972734899999999, 'neuron_median': 0.40962212, 'p': 1.968347994646941e-26}, 'spatial_conc10': {'sae_median': 0.83707995, 'neuron_median': 0.1571102, 'p': 1.197032968030362e-32}, 'interp_score': {'sae_median': 0.6897136006770691, 'neuron_median': 0.39175693014200336, 'p': 4.7496720832492284e-32}}
 - caveat: neurons use the positive part of the normalised activation; metrics are class/spatial proxies, not human ratings
 
 ## H2: **Not tested**
@@ -21,7 +21,7 @@
 - n_separated: 0
 - n_candidates: 4
 - features_separated: []
-- mean_delta_logit_primary_alpha: 7.227407768368601e-05
+- mean_delta_logit_primary_alpha: 7.227407768368721e-05
 
 ## H5: **Partially supported (per-modified-patch effect only)**
 

@@ -1,0 +1,40 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Testing & coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Notebook checkpoints
+.ipynb_checkpoints
+
+# IDE and OS files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Large activation cache (keep directory structure)
+activations/store/*
+!activations/store/selftest/
+!activations/store/smoke/
+
+# Raw dataset downloads
+data/raw/*
+!data/raw/.gitkeep
+
+# Logs and temp files
+*.log
+tmp/

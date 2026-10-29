@@ -4,7 +4,11 @@ Pipeline: ViT -> block-L patch activations -> SAE (standard / L1 / Top-K) -> fea
 interpretation -> causal intervention (ablation, amplification, steering) -> random controls + statistics -> reports.
 
 ## Setup
+    # Linux / macOS:
     python -m venv .venv && source .venv/bin/activate
+    # Windows PowerShell:
+    python -m venv .venv; .venv\Scripts\Activate.ps1
+
     pip install -r requirements.txt
 
 ## Verify the install (offline, no downloads: tiny random ViT + synthetic images)
