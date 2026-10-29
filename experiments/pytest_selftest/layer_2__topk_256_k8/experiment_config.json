@@ -28,7 +28,7 @@
     "layers": [
       2
     ],
-    "out_dir": "C:\\Users\\ADMIN\\AppData\\Local\\Temp\\pytest-of-ADMIN\\pytest-9\\test_end_to_end_selftest0\\store",
+    "out_dir": "C:\\Users\\ADMIN\\AppData\\Local\\Temp\\pytest-of-ADMIN\\pytest-10\\test_end_to_end_selftest0\\store",
     "dtype": "float16",
     "normalization": "standardize",
     "write_patch_metadata": false
@@ -149,6 +149,6 @@
       8
     ]
   },
-  "created": "2026-10-29 22:28:27",
+  "created": "2026-10-30 00:34:36",
   "run_tag": "layer_2__topk_256_k8"
 }
