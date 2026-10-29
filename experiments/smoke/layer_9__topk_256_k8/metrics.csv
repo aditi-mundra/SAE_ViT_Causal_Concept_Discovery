@@ -1,0 +1,2 @@
+epoch,train_loss,train_mse,train_l0,train_dead_pct,val_mse,val_explained_variance,val_l0,val_dead_pct,val_density,seconds
+1,0.9263685345649719,0.9263685345649719,8.0,0.0,1.098760072876807,-0.13390180507045213,8.0,17.578125,0.03124999813735485,0.05289936065673828

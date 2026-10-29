@@ -1,0 +1,11 @@
+image_id,position,class_id,class_name,split
+33553,0,63,porcupine,sae_train
+9427,1,13,bus,sae_train
+199,2,69,rocket,sae_train
+12447,3,16,can,causal_eval
+39489,4,72,seal,feature_val
+42724,5,18,caterpillar,sae_train
+10822,6,10,bowl,causal_eval
+49498,7,22,clock,sae_train
+4144,8,93,turtle,sae_train
+36958,9,73,shark,feature_val

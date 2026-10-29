@@ -1,0 +1,17 @@
+{
+  "n_alive": 211,
+  "width": 256,
+  "median_purity": 0.9483610987663269,
+  "median_class_entropy_norm": 0.04414883102094642,
+  "median_spatial_conc10": 1.0,
+  "median_top_patch_purity": 1.0,
+  "median_interp_score": 0.9191875656445821,
+  "pct_highly_specific": 100.0,
+  "pct_moderately_specific": 0.0,
+  "pct_polysemantic": 0.0,
+  "neuron_median_purity": 0.6708990335464478,
+  "neuron_median_class_entropy_norm": 0.13757147903279543,
+  "neuron_median_spatial_conc10": 0.3138304352760315,
+  "neuron_median_interp_score": 0.6478168374377713,
+  "clip_mean_score": null
+}

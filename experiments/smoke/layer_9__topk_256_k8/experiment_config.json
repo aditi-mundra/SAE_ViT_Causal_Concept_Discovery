@@ -1,0 +1,154 @@
+{
+  "name": "smoke",
+  "seed": 42,
+  "layer": 9,
+  "device": "auto",
+  "model": {
+    "name": "vit_base_patch16_224",
+    "pretrained": true,
+    "img_size": 224,
+    "patch_size": 16,
+    "embed_dim": 768,
+    "num_prefix_tokens": 1
+  },
+  "data": {
+    "dataset": "cifar100",
+    "root": "C:\\Users\\ADMIN\\Desktop\\SAE_ViT_Causal_Concept_Discovery\\data\\raw",
+    "folder": "",
+    "num_images": 10,
+    "batch_size": 5,
+    "num_workers": 0,
+    "split_fractions": [
+      0.6,
+      0.2,
+      0.2
+    ]
+  },
+  "extract": {
+    "layers": [
+      9
+    ],
+    "out_dir": "C:\\Users\\ADMIN\\Desktop\\SAE_ViT_Causal_Concept_Discovery\\activations\\store",
+    "dtype": "float16",
+    "normalization": "standardize",
+    "write_patch_metadata": false
+  },
+  "sae": {
+    "sae_type": "topk",
+    "width": 256,
+    "k": 8,
+    "l1_lambda": 0.003,
+    "lr": 0.001,
+    "batch_size": 512,
+    "epochs": 1,
+    "dead_threshold": 1e-08,
+    "decoder_unit_norm": true,
+    "grad_clip": 1.0,
+    "chunk_images": 5,
+    "val_images_per_epoch": 300
+  },
+  "discovery": {
+    "top_n_patches": 20,
+    "heatmap_threshold": 0.5,
+    "clip_prompts": [
+      "wheel",
+      "road",
+      "grass",
+      "sky",
+      "building",
+      "window",
+      "face",
+      "fur",
+      "water",
+      "text",
+      "leaf",
+      "snow",
+      "sand",
+      "metal",
+      "wood"
+    ],
+    "use_clip": false,
+    "clip_model": "openai/clip-vit-base-patch32",
+    "clip_top_m": 10,
+    "clip_max_features": 256,
+    "chunk_images": 16,
+    "n_feature_reports": 1,
+    "specific_thresholds": [
+      0.4,
+      0.7
+    ],
+    "min_freq": 0.001,
+    "max_freq": 0.2,
+    "n_clusters": 10,
+    "use_umap": false
+  },
+  "intervention": {
+    "suppress_alphas": [
+      0.75,
+      0.5,
+      0.25,
+      0.0
+    ],
+    "amplify_alphas": [
+      1.5,
+      2.0,
+      3.0,
+      5.0
+    ],
+    "dose_multipliers": [
+      0.0,
+      0.25,
+      0.5,
+      0.75,
+      1.0,
+      1.5,
+      2.0,
+      3.0,
+      5.0
+    ],
+    "steer_alphas": [
+      -5.0,
+      -2.0,
+      -1.0,
+      0.0,
+      1.0,
+      2.0,
+      5.0
+    ],
+    "local_percentiles": [
+      50,
+      75,
+      90,
+      95
+    ],
+    "n_random_controls": 5,
+    "n_bootstrap": 100,
+    "n_eval_images": 4,
+    "n_candidates": 3,
+    "min_active_images": 1,
+    "control_freq_ratio": 3.0,
+    "n_interaction_features": 3,
+    "n_spatial_features": 1,
+    "n_spatial_images": 1,
+    "n_multi_steer": 3,
+    "random_dose_controls": 3,
+    "amp_alpha_primary": 2.0,
+    "n_gradcam_figs": 1,
+    "batch_size": 32,
+    "max_norm_ratio": 3.0,
+    "max_abs_alpha": 10.0
+  },
+  "sweep": {
+    "widths": [
+      256
+    ],
+    "types": [
+      "topk"
+    ],
+    "topks": [
+      8
+    ]
+  },
+  "created": "2026-10-29 23:44:44",
+  "run_tag": "layer_9__topk_256_k8"
+}
