@@ -1,7 +1,7 @@
 """
 app.py [CORE] -- SAE-ViT Research Dashboard  (streamlit run app.py)
 Requires a finished run: python run_pipeline.py --mode demo  (or selftest / smoke)
-UI/UX branch: ui/research-dashboard-redesign
+UI/UX branch: ui/research-dashboard-polish
 """
 from __future__ import annotations
 
@@ -31,21 +31,25 @@ st.set_page_config(
 # ─────────────────────────── global CSS ──────────────────────────────────────
 st.markdown("""
 <style>
-/* ── typography & base ── */
 html, body, [class*="css"] { font-family: 'Inter', 'Segoe UI', sans-serif; }
+.stApp, [data-testid="stAppViewContainer"] {
+    background: #0f1120;
+    color: #e8ecff;
+}
+[data-testid="stHeader"] { background: rgba(15, 17, 32, .96); }
+.block-container { padding-top: 1.4rem; padding-bottom: 2.4rem; max-width: 1400px; }
 
-/* ── metric cards ── */
 [data-testid="metric-container"] {
     background: #1e2130;
     border: 1px solid #2d3250;
     border-radius: 10px;
     padding: 12px 16px;
+    min-height: 96px;
 }
 [data-testid="stMetricLabel"] { font-size: 0.72rem; color: #8b9ac4; letter-spacing: .05em; text-transform: uppercase; }
-[data-testid="stMetricValue"] { font-size: 1.35rem; font-weight: 700; color: #e8ecff; }
+[data-testid="stMetricValue"] { font-size: 1.28rem; font-weight: 700; color: #e8ecff; line-height: 1.25; word-break: break-word; }
 [data-testid="stMetricDelta"] { font-size: 0.78rem; }
 
-/* ── section headers ── */
 .section-header {
     color: #a5b4fc;
     font-size: 0.72rem;
@@ -54,10 +58,26 @@ html, body, [class*="css"] { font-family: 'Inter', 'Segoe UI', sans-serif; }
     text-transform: uppercase;
     border-bottom: 1px solid #2d3250;
     padding-bottom: 6px;
-    margin: 24px 0 12px;
+    margin: 28px 0 14px;
+}
+.page-kicker {
+    color: #6b7db3;
+    font-size: 0.88rem;
+    line-height: 1.55;
+    margin: 0 0 18px;
+    overflow-wrap: anywhere;
+}
+.page-title {
+    color: #e8ecff;
+    font-size: clamp(1.6rem, 2.4vw, 2.15rem);
+    font-weight: 800;
+    letter-spacing: -.03em;
+    line-height: 1.3;
+    margin: 0 0 4px;
+    overflow-wrap: anywhere;
+    padding: .08em 0 .12em;
 }
 
-/* ── research badges ── */
 .badge {
     display: inline-block;
     padding: 3px 10px;
@@ -72,7 +92,6 @@ html, body, [class*="css"] { font-family: 'Inter', 'Segoe UI', sans-serif; }
 .badge-warn    { background: #3b2a00; color: #fbbf24; border: 1px solid #d9770033; }
 .badge-danger  { background: #3b0000; color: #f87171; border: 1px solid #dc262633; }
 
-/* ── card containers ── */
 .info-card {
     background: #1a1d2e;
     border: 1px solid #2d3250;
@@ -80,17 +99,32 @@ html, body, [class*="css"] { font-family: 'Inter', 'Segoe UI', sans-serif; }
     padding: 16px 20px;
     margin-bottom: 12px;
 }
+[data-testid="stVerticalBlockBorderWrapper"] {
+    background: #15182a;
+    border: 1px solid #2d3250;
+    border-radius: 10px;
+    padding: 8px 10px 6px;
+    height: 100%;
+}
+.empty-state {
+    background: #15182a;
+    border: 1px dashed #3a4268;
+    border-radius: 12px;
+    padding: 28px 22px;
+    text-align: center;
+    margin: 8px 0 16px;
+}
+.empty-title { color: #e8ecff; font-weight: 650; font-size: 0.95rem; margin-bottom: 6px; }
+.empty-detail { color: #6b7db3; font-size: 0.82rem; line-height: 1.55; }
 
-/* ── captions ── */
 .plot-caption {
-    font-size: 0.72rem;
-    color: #6b7db3;
-    margin-top: -8px;
-    margin-bottom: 12px;
+    font-size: 0.75rem;
+    color: #7b8dc4;
+    margin: 4px 0 14px;
+    line-height: 1.45;
     font-style: italic;
 }
 
-/* ── sidebar styling ── */
 [data-testid="stSidebarContent"] { background: #0f1120; }
 .sidebar-title {
     font-size: 1.05rem;
@@ -106,32 +140,52 @@ html, body, [class*="css"] { font-family: 'Inter', 'Segoe UI', sans-serif; }
     line-height: 1.5;
 }
 
-/* ── tab styling ── */
-[data-testid="stTab"] { font-size: 0.82rem; font-weight: 500; }
-
-/* ── expander ── */
-[data-testid="stExpander"] summary {
-    font-size: 0.82rem;
-    color: #8b9ac4;
+.stTabs [data-baseweb="tab-list"] { gap: 2px; flex-wrap: wrap; }
+.stTabs [data-baseweb="tab"] {
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 8px 12px;
+    height: auto;
+    white-space: nowrap;
 }
-
-/* ── dataframe ── */
+[data-testid="stExpander"] summary { font-size: 0.82rem; color: #8b9ac4; }
 [data-testid="stDataFrame"] { border-radius: 8px; overflow: hidden; }
-
-/* ── image captions ── */
-[data-testid="caption"] { font-size: 0.7rem; color: #6b7db3; text-align: center; }
-
-/* ── divider ── */
+[data-testid="stImage"] img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    border-radius: 8px;
+    border: 1px solid #2d3250;
+}
+[data-testid="caption"] { font-size: 0.72rem; color: #6b7db3; text-align: center; line-height: 1.35; }
 hr { border-color: #2d3250 !important; margin: 20px 0; }
-
-/* ── warning / success / info overrides ── */
 [data-testid="stAlert"] { border-radius: 8px; font-size: 0.82rem; }
+div[data-testid="stDownloadButton"] button {
+    width: 100%;
+    white-space: normal;
+    height: auto;
+    min-height: 2.5rem;
+    font-size: 0.78rem;
+    line-height: 1.3;
+    text-align: left;
+    padding: 0.45rem 0.7rem;
+}
 </style>
 """, unsafe_allow_html=True)
 
 EXPS = PROJECT_ROOT / "experiments"
-_PLOT_H = 380   # default plotly chart height
+_PLOT_H = 400
 _PLOT_H_LG = 480
+_PLOT_COLORWAY = ["#6366f1", "#f472b6", "#34d399", "#fbbf24", "#60a5fa", "#a78bfa", "#fb7185", "#2dd4bf"]
+_PLOTLY_CONFIG = {
+    "displaylogo": False,
+    "responsive": True,
+    "toImageButtonOptions": {
+        "format": "png",
+        "filename": "sae_vit_chart",
+        "scale": 2,
+    },
+}
 
 
 # ─────────────────────────── helpers ─────────────────────────────────────────
@@ -152,6 +206,14 @@ def badge(text: str, kind: str = "info"):
     st.markdown(f'<span class="badge badge-{kind}">{text}</span>', unsafe_allow_html=True)
 
 
+def empty_state(title: str, detail: str = ""):
+    extra = f'<div class="empty-detail">{detail}</div>' if detail else ""
+    st.markdown(
+        f'<div class="empty-state"><div class="empty-title">{title}</div>{extra}</div>',
+        unsafe_allow_html=True,
+    )
+
+
 def safe_json(path) -> dict:
     try:
         return load_json(path)
@@ -166,17 +228,87 @@ def pct_bar(val: float, lo: float = 0, hi: float = 1, color: str = "#6366f1") ->
 
 
 def plotly_defaults(fig: go.Figure, height: int = _PLOT_H) -> go.Figure:
+    axis = dict(
+        gridcolor="#1e2130",
+        linecolor="#2d3250",
+        zerolinecolor="#2d3250",
+        title_font=dict(size=12, color="#c7d0ef"),
+        tickfont=dict(size=11, color="#9aa8d6"),
+        automargin=True,
+    )
     fig.update_layout(
         height=height,
+        autosize=True,
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="#0f1120",
-        font=dict(color="#c7d0ef", size=11, family="Inter,Segoe UI,sans-serif"),
-        legend=dict(bgcolor="rgba(0,0,0,0)", bordercolor="#2d3250", borderwidth=1),
-        margin=dict(l=48, r=16, t=40, b=48),
-        xaxis=dict(gridcolor="#1e2130", linecolor="#2d3250", zerolinecolor="#2d3250"),
-        yaxis=dict(gridcolor="#1e2130", linecolor="#2d3250", zerolinecolor="#2d3250"),
+        font=dict(color="#c7d0ef", size=12, family="Inter,Segoe UI,sans-serif"),
+        title=dict(font=dict(size=14, color="#e8ecff"), x=0, xanchor="left", y=0.98),
+        legend=dict(
+            bgcolor="rgba(0,0,0,0)",
+            borderwidth=0,
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            x=0,
+            font=dict(size=11),
+        ),
+        margin=dict(l=56, r=28, t=84, b=64),
+        colorway=_PLOT_COLORWAY,
+        hoverlabel=dict(bgcolor="#1e2130", font_size=12, font_family="Inter,Segoe UI,sans-serif"),
+        bargap=0.22,
+        xaxis=axis,
+        yaxis=axis,
     )
+    fig.update_xaxes(automargin=True)
+    fig.update_yaxes(automargin=True)
     return fig
+
+
+def show_chart(fig: go.Figure, height: int = _PLOT_H):
+    st.plotly_chart(
+        plotly_defaults(fig, height),
+        use_container_width=True,
+        config=_PLOTLY_CONFIG,
+    )
+
+
+def show_table(df: Optional[pd.DataFrame], height: int = 360, empty_title: str = "No rows to display"):
+    if df is None or df.empty:
+        empty_state(empty_title, "This artifact is missing or empty for the selected run.")
+        return
+    column_config = {}
+    for col in df.columns:
+        if pd.api.types.is_float_dtype(df[col]):
+            column_config[col] = st.column_config.NumberColumn(col.replace("_", " "), format="%.4f")
+        else:
+            column_config[col] = st.column_config.Column(str(col).replace("_", " "))
+    n = len(df)
+    table_h = min(max(140, 38 + 32 * min(n, 12)), height)
+    st.dataframe(
+        df,
+        use_container_width=True,
+        hide_index=True,
+        height=table_h,
+        column_config=column_config,
+    )
+
+
+def show_png_grid(paths, ncols: int = 3, meta: Optional[dict] = None):
+    paths = list(paths)
+    if not paths:
+        empty_state("No saved plots found", "Pipeline plot PNGs will appear here after a completed run.")
+        return
+    meta = meta or {}
+    for i in range(0, len(paths), ncols):
+        row = paths[i:i + ncols]
+        cols = st.columns(ncols)
+        for col, p in zip(cols, row):
+            title, tip = meta.get(p.name, (p.stem.replace("_", " ").title(), ""))
+            with col:
+                with st.container(border=True):
+                    st.image(str(p), caption=title, width="stretch")
+                    if tip:
+                        caption(tip)
 
 
 # ─────────────────────────── sidebar ─────────────────────────────────────────
@@ -184,7 +316,10 @@ with st.sidebar:
     st.markdown('<p class="sidebar-title">⚗️ SAE-ViT Explorer</p>', unsafe_allow_html=True)
     st.markdown('<p class="sidebar-sub">Causal Concept Discovery in Vision Transformers · Mechanistic Interpretability</p>', unsafe_allow_html=True)
 
-    exps = sorted(d.name for d in EXPS.iterdir() if d.is_dir()) if EXPS.exists() else []
+    exps = sorted(
+        (d.name for d in EXPS.iterdir() if d.is_dir()),
+        key=lambda name: ("selftest" in name.lower(), name.lower()),
+    ) if EXPS.exists() else []
     if not exps:
         st.error("No experiments found. Run `python run_pipeline.py --mode demo` first.")
         st.stop()
@@ -206,16 +341,7 @@ with st.sidebar:
 
     st.divider()
 
-    # experiment badge
-    is_selftest = "selftest" in exp.lower()
-    if is_selftest:
-        st.warning("⚠️ **Synthetic self-test** — tiny random ViT + synthetic images. "
-                   "Metrics and concept labels are not scientifically meaningful.", icon="🧪")
-    else:
-        st.success(f"**{exp}** · Real pretrained model", icon="✅")
-
-    st.divider()
-    st.caption("Branch: `ui/research-dashboard-redesign`")
+    st.caption("Branch: `ui/research-dashboard-polish`")
     st.caption("Never retrained — all results from saved checkpoints.")
 
 
@@ -233,11 +359,6 @@ default_feat = int(cand["feature_id"].iloc[0]) if cand is not None and len(cand)
 res = safe_json(run_dir / "results.json")
 m = res.get("metrics", {})
 layer_sum = safe_json(run_dir / "layer_summary.json")
-warns = safe_json(run_dir / "warnings.json") if isinstance(safe_json(run_dir / "warnings.json"), list) else []
-if isinstance(warns, dict):
-    warns = []
-
-
 # ─────────────────────────── intervention helpers ────────────────────────────
 def need_causal_images(fid, limit=300):
     pos = ctx.splits["causal"][:limit]
@@ -280,12 +401,14 @@ def show_result(base, new, info):
             "class (after)": [names[i] for i in np.argsort(-new)[:5]],
             "logit after": np.sort(new)[::-1][:5].round(3),
         })
-        st.dataframe(t, use_container_width=True, hide_index=True)
+        show_table(t, height=220)
 
 
 def pick_image(key, fid):
-    src = st.radio("Image source", ["Held-out causal-eval", "Upload your own"],
-                   key=key + "src", horizontal=True)
+    sources = ["Held-out causal-eval"]
+    if ctx.supports_uploaded_image_analysis:
+        sources.append("Upload your own")
+    src = st.radio("Image source", sources, key=key + "src", horizontal=True)
     if src == "Upload your own":
         up = st.file_uploader("Image (PNG / JPG)", type=["png", "jpg", "jpeg"], key=key + "up")
         if up is None:
@@ -306,12 +429,8 @@ def pick_image(key, fid):
 #  HEADER  (above tabs)
 # ═══════════════════════════════════════════════════════════════════════════════
 st.markdown("""
-<div style="display:flex;align-items:center;gap:14px;margin-bottom:4px">
-  <div style="font-size:2rem;font-weight:800;color:#e8ecff;letter-spacing:-.03em">
-    SAE-ViT · Causal Concept Discovery
-  </div>
-</div>
-<div style="color:#6b7db3;font-size:0.85rem;margin-bottom:20px">
+<div class="page-title">SAE-ViT · Causal Concept Discovery</div>
+<div class="page-kicker">
   Mechanistic interpretability: Sparse Autoencoder feature discovery + causal interventions in Vision Transformers
   &nbsp;|&nbsp; <b style="color:#a5b4fc">{exp}</b> &nbsp;·&nbsp; <b style="color:#a5b4fc">{run}</b>
 </div>
@@ -345,7 +464,6 @@ with tabs[0]:
 
     section("SAE Reconstruction Quality")
     ev = m.get("explained_variance", float("nan"))
-    ev_color = "#4ade80" if ev >= 0.70 else ("#fbbf24" if ev >= 0.50 else "#f87171")
     c = st.columns(4)
     c[0].metric("Explained Variance (EV)", f"{ev:.3f}",
                 help="Fraction of activation variance explained by the SAE reconstruction. Target ≥ 0.70")
@@ -357,9 +475,8 @@ with tabs[0]:
                 help="Percentage of features that never activate on the validation split")
 
     st.markdown(
-        f'<div style="margin-top:6px">{pct_bar(ev, 0, 1, ev_color)}'
+        f'<div style="margin-top:6px">{pct_bar(ev, 0, 1, "#6366f1")}'
         f'<span style="font-size:0.68rem;color:#6b7db3">&nbsp;Explained Variance: {ev:.1%}'
-        f" ({'✅ Good' if ev >= 0.70 else ('⚠️ Borderline' if ev >= 0.50 else '❌ Poor')})"
         f"</span></div>",
         unsafe_allow_html=True,
     )
@@ -399,23 +516,6 @@ with tabs[0]:
         caption("Ablation logit drop measures the causal influence of each feature on model predictions. "
                 "Candidates should exceed random-control baselines.")
 
-    # ── warnings ──────────────────────────────────────────────────────────────
-    section("Automatic Warnings & Scientific Diagnostics")
-    raw_warns = res.get("warnings", [])
-    if isinstance(raw_warns, list) and raw_warns:
-        for w in raw_warns:
-            st.warning(w, icon="⚠️")
-    else:
-        st.success("No warnings generated by the pipeline.", icon="✅")
-
-    if is_selftest:
-        st.info(
-            "**Self-test mode**: This run uses a tiny random ViT and synthetic images. "
-            "All numeric results (EV, purity, causal effects) are expected to be near-zero "
-            "and should not be interpreted as scientific findings.",
-            icon="🧪",
-        )
-
     # ── saved plots grid ──────────────────────────────────────────────────────
     plots_dir = run_dir / "plots"
     all_plots = sorted(plots_dir.glob("*.png")) if plots_dir.exists() else []
@@ -436,27 +536,19 @@ with tabs[0]:
             "feature_interaction.png":      ("Feature Interaction", "Synergy and redundancy between pairs of candidate features."),
         }
 
-        # GradCAM plots are named dynamically
         gcam_plots = [p for p in all_plots if "gradcam" in p.name]
         regular_plots = [p for p in all_plots if "gradcam" not in p.name]
-
-        # show 3 per row
-        for i in range(0, len(regular_plots), 3):
-            row_plots = regular_plots[i:i + 3]
-            cols = st.columns(len(row_plots))
-            for col, p in zip(cols, row_plots):
-                meta_title, meta_cap = PLOT_META.get(p.name, (p.stem.replace("_", " ").title(), ""))
-                col.image(str(p), caption=meta_title, use_container_width=True)
-                if meta_cap:
-                    col.markdown(f'<p class="plot-caption">{meta_cap}</p>', unsafe_allow_html=True)
+        show_png_grid(regular_plots, ncols=3, meta=PLOT_META)
 
         if gcam_plots:
             section("Grad-CAM vs. SAE Feature Comparison")
             caption("Side-by-side comparison of gradient-based (Grad-CAM) and SAE-based concept localisation.")
-            cols = st.columns(min(3, len(gcam_plots)))
-            for col, p in zip(cols, gcam_plots):
-                col.image(str(p), caption=p.stem.replace("_", " ").replace("gradcam vs sae feature", "Grad-CAM vs SAE · Feature "),
-                          use_container_width=True)
+            show_png_grid(gcam_plots, ncols=3)
+    else:
+        empty_state(
+            "No saved pipeline plots yet",
+            "PNG figures from `run_pipeline.py` will appear in a 3-column gallery here.",
+        )
 
     # ── config expander ───────────────────────────────────────────────────────
     with st.expander("⚙️ Experiment configuration (click to expand)"):
@@ -472,15 +564,25 @@ with tabs[0]:
 with tabs[1]:
     section("Upload an Image — Inspect Active SAE Features")
     st.markdown(
-        "Upload any image to see how the ViT model processes it and which SAE features activate strongly. "
-        "Top activating features are matched against discovered concept labels.",
+        "Upload an image to inspect its ImageNet prediction and active SAE features, annotated with "
+        "information from the selected run's saved discovery artifacts.",
     )
 
     if not summ_ok:
         st.warning("Feature discovery data not found. Run `python discover.py` first.", icon="⚠️")
+        empty_state("Image explorer unavailable", "Feature discovery artifacts are required to inspect active SAE features.")
     else:
-        up = st.file_uploader("Upload image (PNG / JPG / JPEG)", type=["png", "jpg", "jpeg"], key="explore")
-        if up is not None:
+        up = None
+        if ctx.supports_uploaded_image_analysis:
+            up = st.file_uploader("Upload image (PNG / JPG / JPEG)", type=["png", "jpg", "jpeg"], key="explore")
+        if not ctx.supports_uploaded_image_analysis:
+            st.caption(
+                "Uploaded-image analysis is available for runs with a pretrained ImageNet classifier "
+                "and a non-synthetic SAE training dataset."
+            )
+        elif up is None:
+            empty_state("No image uploaded", "Choose a PNG or JPG above to inspect ViT predictions and active SAE features.")
+        else:
             from PIL import Image as PilImage
             pil = PilImage.open(up).convert("RGB")
             out = analyze_image(ctx, pil)
@@ -490,7 +592,7 @@ with tabs[1]:
 
             col_img, col_pred = st.columns([1, 2])
             with col_img:
-                st.image(pil, caption="Uploaded image", use_container_width=True)
+                st.image(pil, caption="Uploaded image", width="stretch")
 
             with col_pred:
                 section("Model Prediction (ImageNet head)")
@@ -500,7 +602,7 @@ with tabs[1]:
                     "Logit": z[top_idx].round(3),
                     "Confidence": (prob[top_idx] * 100).round(2),
                 })
-                st.dataframe(pred_df, use_container_width=True, hide_index=True)
+                show_table(pred_df, height=240)
 
                 top_class = ctx.vit_class_names[top_idx[0]]
                 top_conf = prob[top_idx[0]] * 100
@@ -508,12 +610,16 @@ with tabs[1]:
 
             st.divider()
             section("Active SAE Features — Layer " + str(cfg.layer))
-            caption(f"Features with highest maximum activation in the SAE at block {cfg.layer}. "
-                    "Concept labels are assigned by CLIP zero-shot matching.")
+            caption(
+                f"Features with highest maximum activation in the SAE at block {cfg.layer}. "
+                "Feature metrics and any labels shown here come from saved discovery artifacts."
+            )
 
             feat_df = pd.DataFrame(out["features"])
             if not feat_df.empty:
-                st.dataframe(feat_df, use_container_width=True, hide_index=True)
+                show_table(feat_df, height=320)
+            else:
+                empty_state("No active SAE features", "This image did not produce tabulated feature activations.")
 
             disc_db = read_csv(disc_dir / "feature_top_patches.csv.gz")
             feats_to_show = out["features"][:4]
@@ -531,14 +637,19 @@ with tabs[1]:
                     )
                     ex = disc_db[disc_db.feature_id == fid_local].head(6)
                     if len(ex):
-                        img_cols = st.columns(len(ex))
+                        img_cols = st.columns(6)
                         for icol, (_, r) in zip(img_cols, ex.iterrows()):
                             try:
-                                img = ctx.image_pil(int(r["position"])).resize((160, 160))
-                                icol.image(img, caption=f"{r['class']}\n{r['activation']:.2f}",
-                                           use_container_width=True)
+                                img = ctx.image_pil(int(r["position"]))
+                                icol.image(
+                                    img,
+                                    caption=f"{r['class']} · {r['activation']:.2f}",
+                                    width="stretch",
+                                )
                             except Exception:
                                 icol.caption("(unavailable)")
+                    else:
+                        empty_state("No example patches", f"No stored top patches for feature {fid_local}.")
                     st.markdown("---")
 
 
@@ -548,130 +659,133 @@ with tabs[1]:
 with tabs[2]:
     if not summ_ok:
         st.warning("Feature discovery data not found. Run `python discover.py` first.", icon="⚠️")
-        st.stop()
+        empty_state("Feature explorer unavailable", "Run discovery so feature summaries, reports, and heatmaps can load.")
+    else:
+        S = ctx.summary()
+        alive_feats = S.index[~S["dead"]].tolist()
+    
+        col_ctrl, col_info = st.columns([1, 2])
+        with col_ctrl:
+            section("Feature Selector")
+            fid = int(st.number_input(
+                "Feature ID", 0, int(ctx.sae.width) - 1, default_feat, key="fx",
+                help=f"Select feature 0–{ctx.sae.width - 1}. Dead features show a warning."
+            ))
+            if alive_feats:
+                st.caption(f"{len(alive_feats)} / {cfg.sae.width} features alive in this run.")
+    
+        row = S.loc[fid]
+    
+        with col_info:
+            section("Feature Status")
+            if row["dead"]:
+                st.error("❌ This feature is **dead** — never active on the validation set.", icon="❌")
+            elif row["freq"] < 1e-4:
+                st.warning("⚠️ This feature activates almost nowhere (very sparse).", icon="⚠️")
+            elif row["freq"] > 0.2:
+                st.warning("⚠️ This feature is very dense — may be polysemantic.", icon="⚠️")
+            else:
+                st.success(f"✅ Feature {fid} is alive and healthy.", icon="✅")
 
-    S = ctx.summary()
-    alive_feats = S.index[~S["dead"]].tolist()
-
-    col_ctrl, col_info = st.columns([1, 2])
-    with col_ctrl:
-        section("Feature Selector")
-        fid = int(st.number_input(
-            "Feature ID", 0, int(ctx.sae.width) - 1, default_feat, key="fx",
-            help=f"Select feature 0–{ctx.sae.width - 1}. Dead features show a warning."
-        ))
-        if alive_feats:
-            st.caption(f"{len(alive_feats)} / {cfg.sae.width} features alive in this run.")
-
-    row = S.loc[fid]
-
-    with col_info:
-        section("Feature Status")
-        if row["dead"]:
-            st.error("❌ This feature is **dead** — never active on the validation set.", icon="❌")
-        elif row["freq"] < 1e-4:
-            st.warning("⚠️ This feature activates almost nowhere (very sparse).", icon="⚠️")
-        elif row["freq"] > 0.2:
-            st.warning("⚠️ This feature is very dense — may be polysemantic.", icon="⚠️")
-        else:
-            st.success(f"✅ Feature {fid} is alive and healthy.", icon="✅")
-
-    if not row["dead"]:
-        # ── core feature metrics ───────────────────────────────────────────────
-        section("Feature Quality Metrics")
-        c = st.columns(5)
-        c[0].metric("Purity", f"{row['purity']:.3f}",
-                    help="Fraction of top activating patches from the dominant class. Closer to 1 = monosemantic.")
-        c[1].metric("Top class", str(row["top_class_name"]))
-        c[2].metric("SCS  (spatial conc.)", f"{row['spatial_conc10']:.3f}",
-                    help="Fraction of feature activation mass in the top-10% of spatial patches.")
-        c[3].metric("Frequency", f"{row['freq']:.4f}",
-                    help="Fraction of validation images where this feature is non-zero.")
-        c[4].metric("Specificity", str(row.get("specificity", "—")))
-
-        c2 = st.columns(4)
-        c2[0].metric("Mean activation", f"{row['mean_act']:.3f}")
-        c2[1].metric("Max activation", f"{row['max_act']:.3f}")
-        c2[2].metric("Top-patch purity", f"{row['top_patch_purity']:.3f}",
-                     help="Purity measured over the single most strongly activating patches.")
-        c2[3].metric("Class coverage", f"{row['class_coverage']:.3f}",
-                     help="Fraction of all classes that this feature is active on.")
-
-        # ── CLIP label ─────────────────────────────────────────────────────────
-        if "clip_concept" in row and isinstance(row["clip_concept"], str) and row["clip_concept"]:
-            st.markdown(
-                f'<div class="info-card">🤖 <b>CLIP concept</b>: '
-                f'<span style="color:#a5b4fc;font-size:1.05rem">{row["clip_concept"]}</span>'
-                f' &nbsp;·&nbsp; score <code>{row["clip_score"]:.3f}</code>'
-                f' &nbsp;·&nbsp; entropy <code>{row["clip_entropy"]:.2f}</code>'
-                f'<br><span style="color:#6b7db3;font-size:0.75rem">Top-3: {row["clip_top3"]}</span></div>',
-                unsafe_allow_html=True,
-            )
-
-        # ── causal stats if candidate ──────────────────────────────────────────
-        if cand is not None and fid in set(cand.feature_id):
-            cr = cand[cand.feature_id == fid].iloc[0]
-            section("Causal Evidence")
-            c = st.columns(4)
-            c[0].metric("Mean ablation logit drop", f"{cr['abl_mean']:.4f}")
-            c[1].metric("95% CI", f"[{cr['abl_ci_lo']:.4f}, {cr['abl_ci_hi']:.4f}]")
-            c[2].metric("Flip rate", f"{cr['abl_flip_rate']:.3f}",
-                        help="Fraction of images where ablation changes the top-1 prediction.")
-            c[3].metric("Causal rank", str(int(cr["causal_rank"])))
-
-        # ── report image (top activating patches + hist + spatial map) ─────────
-        section("Feature Report")
-        caption("Top 12 maximally activating image patches (red box), activation histogram, "
-                "class distribution, and mean spatial activation map.")
-        with st.spinner("Generating feature report…"):
-            rep = feature_report(ctx, fid)
-        st.image(rep["report"], use_container_width=True)
-
-        # ── heatmaps row ───────────────────────────────────────────────────────
-        hm = rep.get("heatmaps", {})
-        if hm:
-            section("Patch Activation Heatmaps (Top-1 Image)")
-            caption("Raw activation map, normalized activation, image overlay, binary mask, and bounding box "
-                    "for the top-activating image of this feature.")
-            HM_LABELS = {
-                "raw": ("Raw activation map", "Unthresholded per-patch activation values interpolated to image resolution."),
-                "normalized": ("Normalized map", "Activation map min-max normalized to [0,1]."),
-                "overlay": ("Overlay", "Normalized activation map blended on the original image."),
-                "mask": ("Binary mask", "Patches above the threshold (default 90th percentile)."),
-                "bbox": ("Bounding box", "Tight bounding box around the thresholded activation region."),
-            }
-            hm_cols = st.columns(5)
-            for col, (k, (title, tip)) in zip(hm_cols, HM_LABELS.items()):
-                if k in hm:
-                    col.image(hm[k], caption=title, use_container_width=True)
-                    col.markdown(f'<p class="plot-caption">{tip}</p>', unsafe_allow_html=True)
-
-        # ── class distribution bar chart ───────────────────────────────────────
-        section("Class Activation Distribution")
-        caption("Probability that each ImageNet class is the most active when this feature fires. "
-                "A peaked distribution indicates a monosemantic, class-specific feature.")
-        cls = ctx.disc["class_mass"][:, fid]
-        pc = cls / max(cls.sum(), 1e-12)
-        top10_idx = np.argsort(-pc)[:10]
-        fig = go.Figure(go.Bar(
-            x=[ctx.store.class_names[i] for i in top10_idx],
-            y=pc[top10_idx],
-            marker_color="#6366f1",
-            text=[f"{v:.3f}" for v in pc[top10_idx]],
-            textposition="outside",
-        ))
-        fig.update_layout(
-            title=f"P(class | Feature {fid} active) — top 10",
-            xaxis_title="Class", yaxis_title="Probability",
-        )
-        st.plotly_chart(plotly_defaults(fig), use_container_width=True)
-
-        # ── saved feature-level plots ──────────────────────────────────────────
-        feats_plots_dir = run_dir / "plots" / "features"
-        feat_report_png = feats_plots_dir / f"feature_{fid}_report.png"
-        if feat_report_png.exists():
-            with st.expander(f"📁 Cached feature {fid} report (saved during pipeline run)"):
-                st.image(str(feat_report_png), use_container_width=True)
+            if row["dead"]:
+                empty_state("No live metrics for this feature", "Dead features have no quality metrics, heatmaps, or class-mass plots.")
+            if not row["dead"]:
+                # ── core feature metrics ───────────────────────────────────────────────
+                section("Feature Quality Metrics")
+                c = st.columns(5)
+                c[0].metric("Purity", f"{row['purity']:.3f}",
+                            help="Fraction of top activating patches from the dominant class. Closer to 1 = monosemantic.")
+                c[1].metric("Top class", str(row["top_class_name"]))
+                c[2].metric("SCS  (spatial conc.)", f"{row['spatial_conc10']:.3f}",
+                            help="Fraction of feature activation mass in the top-10% of spatial patches.")
+                c[3].metric("Frequency", f"{row['freq']:.4f}",
+                            help="Fraction of validation images where this feature is non-zero.")
+                c[4].metric("Specificity", str(row.get("specificity", "—")))
+        
+                c2 = st.columns(4)
+                c2[0].metric("Mean activation", f"{row['mean_act']:.3f}")
+                c2[1].metric("Max activation", f"{row['max_act']:.3f}")
+                c2[2].metric("Top-patch purity", f"{row['top_patch_purity']:.3f}",
+                             help="Purity measured over the single most strongly activating patches.")
+                c2[3].metric("Class coverage", f"{row['class_coverage']:.3f}",
+                             help="Fraction of all classes that this feature is active on.")
+        
+                # ── CLIP label ─────────────────────────────────────────────────────────
+                if "clip_concept" in row and isinstance(row["clip_concept"], str) and row["clip_concept"]:
+                    st.markdown(
+                        f'<div class="info-card">🤖 <b>CLIP concept</b>: '
+                        f'<span style="color:#a5b4fc;font-size:1.05rem">{row["clip_concept"]}</span>'
+                        f' &nbsp;·&nbsp; score <code>{row["clip_score"]:.3f}</code>'
+                        f' &nbsp;·&nbsp; entropy <code>{row["clip_entropy"]:.2f}</code>'
+                        f'<br><span style="color:#6b7db3;font-size:0.75rem">Top-3: {row["clip_top3"]}</span></div>',
+                        unsafe_allow_html=True,
+                    )
+        
+                # ── causal stats if candidate ──────────────────────────────────────────
+                if cand is not None and fid in set(cand.feature_id):
+                    cr = cand[cand.feature_id == fid].iloc[0]
+                    section("Causal Evidence")
+                    c = st.columns(4)
+                    c[0].metric("Mean ablation logit drop", f"{cr['abl_mean']:.4f}")
+                    c[1].metric("95% CI", f"[{cr['abl_ci_lo']:.4f}, {cr['abl_ci_hi']:.4f}]")
+                    c[2].metric("Flip rate", f"{cr['abl_flip_rate']:.3f}",
+                                help="Fraction of images where ablation changes the top-1 prediction.")
+                    c[3].metric("Causal rank", str(int(cr["causal_rank"])))
+        
+                # ── report image (top activating patches + hist + spatial map) ─────────
+                section("Feature Report")
+                caption("Top 12 maximally activating image patches (red box), activation histogram, "
+                        "class distribution, and mean spatial activation map.")
+                with st.spinner("Generating feature report…"):
+                    rep = feature_report(ctx, fid)
+                st.image(rep["report"], width="stretch")
+        
+                # ── heatmaps row ───────────────────────────────────────────────────────
+                hm = rep.get("heatmaps", {})
+                if hm:
+                    section("Patch Activation Heatmaps (Top-1 Image)")
+                    caption("Raw activation map, normalized activation, image overlay, binary mask, and bounding box "
+                            "for the top-activating image of this feature.")
+                    HM_LABELS = {
+                        "raw": ("Raw activation map", "Unthresholded per-patch activation values interpolated to image resolution."),
+                        "normalized": ("Normalized map", "Activation map min-max normalized to [0,1]."),
+                        "overlay": ("Overlay", "Normalized activation map blended on the original image."),
+                        "mask": ("Binary mask", "Patches above the threshold (default 90th percentile)."),
+                        "bbox": ("Bounding box", "Tight bounding box around the thresholded activation region."),
+                    }
+                hm_cols = st.columns(5, gap="small")
+                for col, (k, (title, tip)) in zip(hm_cols, HM_LABELS.items()):
+                    if k in hm:
+                        with col:
+                            st.image(hm[k], caption=title, width="stretch")
+                            st.caption(tip)
+        
+                # ── class distribution bar chart ───────────────────────────────────────
+                section("Class Activation Distribution")
+                caption("Probability that each ImageNet class is the most active when this feature fires. "
+                        "A peaked distribution indicates a monosemantic, class-specific feature.")
+                cls = ctx.disc["class_mass"][:, fid]
+                pc = cls / max(cls.sum(), 1e-12)
+                top10_idx = np.argsort(-pc)[:10]
+                fig = go.Figure(go.Bar(
+                    x=[ctx.store.class_names[i] for i in top10_idx],
+                    y=pc[top10_idx],
+                    marker_color="#6366f1",
+                    text=[f"{v:.3f}" for v in pc[top10_idx]],
+                    textposition="outside",
+                ))
+                fig.update_layout(
+                    title=f"P(class | Feature {fid} active) — top 10",
+                    xaxis_title="Class", yaxis_title="Probability",
+                )
+                show_chart(fig, _PLOT_H)
+        
+                # ── saved feature-level plots ──────────────────────────────────────────
+                feats_plots_dir = run_dir / "plots" / "features"
+                feat_report_png = feats_plots_dir / f"feature_{fid}_report.png"
+                if feat_report_png.exists():
+                    with st.expander(f"📁 Cached feature {fid} report (saved during pipeline run)"):
+                        st.image(str(feat_report_png), width="stretch")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -680,6 +794,7 @@ with tabs[2]:
 with tabs[3]:
     if not summ_ok:
         st.warning("Run `python discover.py` first to enable causal interventions.", icon="⚠️")
+        empty_state("Causal intervention unavailable", "Discovery outputs are required before live interventions can run.")
     else:
         section("Intervention Controls")
         col_f, col_k, col_s, col_sc, col_p = st.columns(5)
@@ -702,7 +817,7 @@ with tabs[3]:
         if hidden is not None:
             col_img, col_res = st.columns([1, 2])
             with col_img:
-                st.image(pil, caption="Selected image", width=240)
+                st.image(pil, caption="Selected image", width="stretch")
 
             with col_res:
                 mode = "steer" if kind.startswith("steer") else "scale"
@@ -724,7 +839,9 @@ with tabs[3]:
             fig.add_bar(name="After", x=classes, y=new[top_all], marker_color="#f472b6")
             fig.update_layout(barmode="group", xaxis_title="Class", yaxis_title="Logit",
                               title=f"Feature {fid} {kind} — Logit shift")
-            st.plotly_chart(plotly_defaults(fig, _PLOT_H_LG), use_container_width=True)
+            show_chart(fig, _PLOT_H_LG)
+        else:
+            empty_state("Select an image to intervene", "Use a held-out causal-eval image or upload one to see before/after logits.")
 
         # ── dose-response from saved data ─────────────────────────────────────
         dr_path = causal_dir / "dose_response.json"
@@ -759,13 +876,15 @@ with tabs[3]:
                         xaxis_title="α (intervention strength)",
                         yaxis_title="Mean logit effect",
                     )
-                    st.plotly_chart(plotly_defaults(fig, _PLOT_H_LG), use_container_width=True)
+                    show_chart(fig, _PLOT_H_LG)
+                else:
+                    empty_state("No dose-response series selected", "Choose one or more features above to plot cached α curves.")
 
             # show saved dose-response plot
             dr_plot = run_dir / "plots" / "dose_response.png"
             if dr_plot.exists():
                 with st.expander("📊 Saved dose-response plot (pipeline output)"):
-                    st.image(str(dr_plot), use_container_width=True)
+                    st.image(str(dr_plot), width="stretch")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -775,6 +894,7 @@ with tabs[4]:
     rc_p = causal_dir / "random_controls.json"
     if not rc_p.exists() or cand is None:
         st.warning("Run `python evaluate.py` first to generate random control results.", icon="⚠️")
+        empty_state("Random control results missing", "This tab needs `random_controls.json` and the candidate causal summary.")
     else:
         section("Statistical Controls — Candidate vs. Random Features")
         st.markdown(
@@ -841,7 +961,7 @@ with tabs[4]:
                 title=f"Feature {f_rc} · {cond.title()} · Effect vs. Frequency-Matched Random Controls",
                 yaxis_title="Mean logit effect",
             )
-            st.plotly_chart(plotly_defaults(fig, _PLOT_H), use_container_width=True)
+            show_chart(fig, _PLOT_H)
             caption("Yellow dashed lines = 95% CI of the random-control distribution. "
                     "The candidate star should lie outside these bounds to be considered causally significant.")
 
@@ -861,13 +981,13 @@ with tabs[4]:
         section("All Candidate Features Summary")
         caption("All features selected as causal candidates (selection from validation split only, "
                 "non-causal criteria), with their statistical test results.")
-        st.dataframe(cand, use_container_width=True, hide_index=True)
+        show_table(cand, height=420, empty_title="No candidate causal summary rows")
 
         # show saved random controls plot
         rc_plot = run_dir / "plots" / "random_controls.png"
         if rc_plot.exists():
             with st.expander("📊 Saved random controls plot (pipeline output)"):
-                st.image(str(rc_plot), use_container_width=True)
+                st.image(str(rc_plot), width="stretch")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -876,6 +996,7 @@ with tabs[4]:
 with tabs[5]:
     if not summ_ok:
         st.warning("Run `python discover.py` first.", icon="⚠️")
+        empty_state("Steering unavailable", "Feature discovery is required to list alive features for steering.")
     else:
         section("Interactive Feature Steering")
         st.markdown(
@@ -896,11 +1017,15 @@ with tabs[5]:
             if hidden is not None:
                 col_img, col_res = st.columns([1, 2])
                 with col_img:
-                    st.image(pil, caption="Selected image", width=240)
+                    st.image(pil, caption="Selected image", width="stretch")
                 with col_res:
                     with st.spinner("Steering…"):
                         base, new, info = run_intervention(hidden, sel, [alpha] * len(sel), "steer", None)
                     show_result(base, new, info)
+            else:
+                empty_state("Select an image to steer", "Pick a held-out image or upload one to apply the selected decoder directions.")
+        else:
+            empty_state("No features selected", "Choose at least one alive feature to steer.")
 
         # ── saved steering curves ──────────────────────────────────────────────
         stf = read_csv(causal_dir / "steering.csv")
@@ -918,18 +1043,20 @@ with tabs[5]:
                     labels={"color": "Feature", "mean_delta_logit": "Mean Δlogit", "alpha": "α"},
                     title="Single-feature steering curves",
                 )
-                st.plotly_chart(plotly_defaults(fig, _PLOT_H_LG), use_container_width=True)
+                show_chart(fig, _PLOT_H_LG)
+            else:
+                empty_state("No single-feature steering curves", "The steering CSV has no `type == single` rows for this run.")
 
             multi = stf[stf.type == "multi"] if (stf.type == "multi").any() else pd.DataFrame()
             if not multi.empty:
                 section("Multi-Feature Steering")
                 caption("Effect of steering multiple features simultaneously.")
-                st.dataframe(multi, use_container_width=True, hide_index=True)
+                show_table(multi, height=320)
 
             sc_plot = run_dir / "plots" / "steering_curves.png"
             if sc_plot.exists():
                 with st.expander("📊 Saved steering curves plot"):
-                    st.image(str(sc_plot), use_container_width=True)
+                    st.image(str(sc_plot), width="stretch")
 
         # ── local vs global ────────────────────────────────────────────────────
         lvg = read_csv(causal_dir / "local_vs_global.csv")
@@ -939,11 +1066,11 @@ with tabs[5]:
             caption("Ablation effect when restricted to the most active spatial region (local) "
                     "vs. applied to all patches (global). A spatially-concentrated feature "
                     "should show a similar effect under both conditions.")
-            st.dataframe(lvg, use_container_width=True, hide_index=True)
+            show_table(lvg, height=320)
             lvg_plot = run_dir / "plots" / "local_vs_global.png"
             if lvg_plot.exists():
                 with st.expander("📊 Saved local vs. global plot"):
-                    st.image(str(lvg_plot), use_container_width=True)
+                    st.image(str(lvg_plot), width="stretch")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -961,14 +1088,14 @@ with tabs[6]:
         cols_show = [c for c in it.columns if c in
                      ["feature_a", "feature_b", "interaction_type", "interaction_effect",
                       "individual_a", "individual_b", "combined", "synergy_ratio", "n_images"]]
-        st.dataframe(it[cols_show] if cols_show else it, use_container_width=True, hide_index=True)
+        show_table(it[cols_show] if cols_show else it, height=360, empty_title="Interaction table is empty")
 
         fi_plot = run_dir / "plots" / "feature_interaction.png"
         if fi_plot.exists():
             st.image(str(fi_plot), caption="Feature interaction plot (saved pipeline output)",
-                     use_container_width=True)
+                     width="stretch")
     else:
-        st.info("No interaction CSV found for this run.", icon="ℹ️")
+        empty_state("No interaction CSV found for this run", "Pairwise synergy/redundancy results will appear after causal evaluation.")
 
     if not summ_ok:
         st.warning("Run `python discover.py` first for live interaction computation.", icon="⚠️")
@@ -1015,7 +1142,7 @@ with tabs[7]:
         "Run `python run_pipeline.py --mode full --sweep` to populate multiple layers."
     )
     if comp is None:
-        st.info("No comparison data found. Run `--sweep` to generate data across multiple layers.", icon="ℹ️")
+        empty_state("No comparison data found", "Run `--sweep` to generate data across multiple layers.")
     else:
         lay = comp[(comp.sae_type == cfg.sae.sae_type) & (comp.width == cfg.sae.width)]
         numeric_cols = [c for c in comp.columns if comp[c].dtype.kind == "f"]
@@ -1030,12 +1157,17 @@ with tabs[7]:
                     labels={metric: metric.replace("_", " ").title(), "layer": "ViT Block Layer"},
                     title=f"{metric.replace('_', ' ').title()} across layers — {cfg.sae.sae_type.upper()} SAE",
                 )
-                st.plotly_chart(plotly_defaults(fig, _PLOT_H_LG), use_container_width=True)
+                show_chart(fig, _PLOT_H_LG)
                 caption(f"Each point is one trained SAE run at the corresponding ViT encoder block. "
                         f"Showing: {cfg.sae.sae_type.upper()} SAE, width={cfg.sae.width}.")
+            else:
+                empty_state(
+                    "No matching layer runs",
+                    f"comparison.csv has no rows for {cfg.sae.sae_type.upper()} SAE with width={cfg.sae.width}.",
+                )
 
         with st.expander("📋 Full comparison table"):
-            st.dataframe(lay, use_container_width=True, hide_index=True)
+            show_table(lay, height=420, empty_title="No matching rows in comparison.csv")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -1049,7 +1181,7 @@ with tabs[8]:
     )
     comp_sae = read_csv(EXPS / exp / "comparison.csv")
     if comp_sae is None:
-        st.info("No comparison data found. Run `--sweep` to generate data across multiple SAE types.", icon="ℹ️")
+        empty_state("No comparison data found", "Run `--sweep` to generate data across multiple SAE types.")
     else:
         sub = comp_sae[comp_sae.layer == cfg.layer]
         numeric_cols = [c for c in comp_sae.columns if comp_sae[c].dtype.kind == "f"]
@@ -1070,12 +1202,14 @@ with tabs[8]:
                     labels={metric: metric.replace("_", " ").title(), "label": "SAE configuration"},
                     title=f"{metric.replace('_', ' ').title()} across SAE architectures — Layer {cfg.layer}",
                 )
-                st.plotly_chart(plotly_defaults(fig, _PLOT_H_LG), use_container_width=True)
+                show_chart(fig, _PLOT_H_LG)
                 caption("Each bar is one SAE architecture at the same ViT layer. "
                         "Compare reconstruction quality, sparsity, and feature quality across SAE designs.")
+            else:
+                empty_state("No SAE runs at this layer", f"comparison.csv has no rows for layer {cfg.layer}.")
 
         with st.expander("📋 Full architecture comparison table"):
-            st.dataframe(sub if not sub.empty else comp_sae, use_container_width=True, hide_index=True)
+            show_table(sub if not sub.empty else comp_sae, height=420)
 
     # ── spatial summary (Grad-CAM correlation) ─────────────────────────────────
     sp_sum = read_csv(causal_dir / "spatial_summary.csv")
@@ -1084,13 +1218,15 @@ with tabs[8]:
         section("Spatial Specificity & Grad-CAM Correlation")
         caption("Spearman correlation between patch activation strength and patch causal effect. "
                 "A high correlation indicates that the feature's spatial structure predicts its causal influence.")
-        st.dataframe(sp_sum, use_container_width=True, hide_index=True)
+        show_table(sp_sum, height=320)
+    else:
+        empty_state("No spatial summary CSV", "Grad-CAM correlation tables appear here after causal evaluation.")
 
     gcam_sum = read_csv(causal_dir / "gradcam_comparison.csv")
     if gcam_sum is not None:
         section("Grad-CAM vs. SAE Feature Overlap")
         caption("Comparison of SAE feature heatmaps against gradient-based Grad-CAM saliency maps.")
-        st.dataframe(gcam_sum, use_container_width=True, hide_index=True)
+        show_table(gcam_sum, height=320)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -1126,18 +1262,34 @@ with tabs[9]:
     }
 
     section("Data & Results")
-    data_cols = st.columns(3)
-    for i, (label, p) in enumerate(DATA_FILES.items()):
-        if Path(p).exists():
+    inventory = pd.DataFrame([
+        {
+            "artifact": label,
+            "file": Path(p).name,
+            "status": "available" if Path(p).exists() else "missing",
+            "size_kb": round(Path(p).stat().st_size / 1024, 1) if Path(p).exists() else None,
+        }
+        for label, p in DATA_FILES.items()
+    ])
+    show_table(inventory, height=420)
+    caption("Download buttons below are shown only for files that exist in this run. Missing artifacts are listed, not invented.")
+
+    present = [(label, p) for label, p in DATA_FILES.items() if Path(p).exists()]
+    if not present:
+        empty_state("No downloadable data files", "This run directory does not yet contain the listed CSVs or JSONs.")
+    else:
+        data_cols = st.columns(3)
+        for i, (label, p) in enumerate(present):
             data_cols[i % 3].download_button(
                 label, Path(p).read_bytes(), file_name=Path(p).name, key="dl_" + label
             )
 
     # ── plots ─────────────────────────────────────────────────────────────────
     all_pngs = list((run_dir / "plots").rglob("*.png")) if (run_dir / "plots").exists() else []
+    st.divider()
+    section("Plots & Visualisations")
     if all_pngs:
-        st.divider()
-        section("Plots & Visualisations")
+        caption(f"{len(all_pngs)} PNG files under `plots/`. Buttons wrap to four columns; hover for the relative path.")
         png_cols = st.columns(4)
         for i, p in enumerate(sorted(all_pngs)):
             rel = str(p).replace(str(run_dir), "").lstrip("/\\")
@@ -1145,6 +1297,8 @@ with tabs[9]:
                 f"🖼 {p.name}", p.read_bytes(), file_name=p.name, mime="image/png",
                 key="png_" + str(p), help=rel,
             )
+    else:
+        empty_state("No plot PNGs found", "Saved matplotlib figures from the pipeline will be listed here.")
 
     # ── full results.csv ───────────────────────────────────────────────────────
     global_results = EXPS / "results.csv"
@@ -1152,6 +1306,8 @@ with tabs[9]:
         st.divider()
         section("Global Results Table (all experiments)")
         gr = read_csv(global_results)
-        st.dataframe(gr, use_container_width=True, hide_index=True)
+        show_table(gr, height=480, empty_title="Global results.csv is empty")
         st.download_button("📥 Download global results.csv",
                            global_results.read_bytes(), file_name="results.csv", key="dl_global")
+    else:
+        empty_state("No global results.csv", "A combined experiment table will appear at `experiments/results.csv`.")

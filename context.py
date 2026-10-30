@@ -30,6 +30,7 @@ class RunContext:
         self.store = ActivationStore(cfg.store_dir())
         tr, va, ca = make_splits(self.store.n, cfg.data.split_fractions, cfg.seed)
         self.splits = {"train": tr, "val": va, "causal": ca}
+        self._classifier_transform = None
         self._model = self._raw = self._disc = self._summary = None
 
     @classmethod
@@ -53,15 +54,38 @@ class RunContext:
     def vit_class_names(self):
         return self.store.model_class_names
 
+    @property
+    def supports_uploaded_image_analysis(self) -> bool:
+        return (
+            self.cfg.model.pretrained
+            and self.cfg.model.name != "tiny_vit"
+            and self.cfg.data.dataset != "synthetic"
+            and len(self.vit_class_names) == 1000
+        )
+
     def transform(self):
         mean, std = get_norm_stats(self.model)
         return make_transform(self.cfg.model.img_size, mean, std)
+
+    def classifier_transform(self):
+        if self._classifier_transform is None:
+            import timm
+
+            data_config = timm.data.resolve_data_config({}, model=self.model)
+            self._classifier_transform = timm.data.create_transform(
+                **data_config,
+                is_training=False,
+            )
+        return self._classifier_transform
 
     def image_pil(self, position: int) -> Image.Image:
         return self.raw.pil(int(self.store.image_ids[int(position)]))
 
     def image_tensor(self, pil: Image.Image) -> torch.Tensor:
         return self.transform()(pil.convert("RGB"))
+
+    def classifier_image_tensor(self, pil: Image.Image) -> torch.Tensor:
+        return self.classifier_transform()(pil.convert("RGB"))
 
     # ---- discovery artifacts
     @property

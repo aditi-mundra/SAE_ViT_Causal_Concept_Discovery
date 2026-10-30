@@ -14,7 +14,7 @@ opencv-python>=4.8
 tqdm>=4.66
 pytest>=7.4
 # DASHBOARD
-streamlit>=1.30
+streamlit>=1.50
 plotly>=5.18
 # ADVANCED OPTIONAL (core pipeline works without these)
 transformers>=4.36      # CLIP semantic labels

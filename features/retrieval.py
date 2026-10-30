@@ -9,9 +9,18 @@ from models.vit import capture
 
 @torch.no_grad()
 def analyze_image(ctx, pil_img, top_n: int = 8) -> dict:
+    if not ctx.supports_uploaded_image_analysis:
+        raise ValueError(
+            "Uploaded-image analysis requires a pretrained 1,000-class model "
+            "and a non-synthetic SAE training dataset."
+        )
+
     x = ctx.image_tensor(pil_img).unsqueeze(0).to(ctx.device)
-    logits, hid = capture(ctx.model, x, [ctx.layer])
+    model = ctx.model
+    _, hid = capture(model, x, [ctx.layer])
     hidden = hid[ctx.layer]
+    classifier_x = ctx.classifier_image_tensor(pil_img).unsqueeze(0).to(ctx.device)
+    logits = model(classifier_x)
     patches = hidden[:, ctx.store.num_prefix:]
     D = ctx.store.d_model
     f = ctx.sae.encode(ctx.normalizer(patches).reshape(-1, D))        # [P, W]
